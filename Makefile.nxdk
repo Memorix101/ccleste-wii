@@ -1,0 +1,37 @@
+XBE_TITLE = CCelesteX
+GEN_XISO = $(XBE_TITLE).iso
+NXDK_DIR ?= ../nxdk
+NXDK_CXX = y
+NXDK_SDL = y
+DEBUG = y
+
+SRCS += \
+				$(CURDIR)/src/celeste.c \
+				$(CURDIR)/src/sdl12main.c
+
+INCLUDES += \
+			-I$(CURDIR)/src/
+
+EXTRA_OFLAGS = \
+						-O2 \
+						-fsigned-char \
+						-fpermissive
+
+FLAGS	=	\
+					-D__XBOX__ \
+
+CFLAGS	+=	-g3 $(EXTRA_OFLAGS) -Wall $(INCLUDES) $(FLAGS)
+
+CXXFLAGS +=	$(CFLAGS) -Wpedantic
+
+include $(NXDK_DIR)/Makefile
+
+TARGET += $(OUTPUT_DIR)/data
+$(GEN_XISO): $(OUTPUT_DIR)/data
+$(OUTPUT_DIR)/data: $(CURDIR)/data $(OUTPUT_DIR)
+	$(VE)cp '$<' '$@'
+
+clean_local:
+	@echo clean ...
+	rm -Rf ./bin
+	find . -name '*.iso' -type f -delete

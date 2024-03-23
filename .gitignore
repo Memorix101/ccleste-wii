@@ -3,3 +3,16 @@ deps
 out
 build
 sis
+
+*.res
+*.iso
+*.lib
+build/
+bin/
+*.obj
+*.d
+loader/**
+.vscode/**
+*.exe
+dependencies/xbox
+dependencies/xbox/nxdk
