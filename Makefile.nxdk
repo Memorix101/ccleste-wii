@@ -1,6 +1,6 @@
 XBE_TITLE = CCelesteX
 GEN_XISO = $(XBE_TITLE).iso
-NXDK_DIR = /Volumes/SSD/Projetos_infaliveis/XboxDev/nxdk
+NXDK_DIR = $(CURDIR)/dependencies/xbox/nxdk
 NXDK_SDL = y
 NXDK_SDL_MIXER = y
 
@@ -37,5 +37,5 @@ clean_local:
 	@echo clean ...
 	rm -Rf ./bin
 	find . -name '*.iso' -type f -delete
-	find . -name '*.obj' -type f -delete
-	find . -name '*.d' -type f -delete
+	find . -name '*.obj' ! -path './dependencies/xbox/nxdk/*' -type f -delete
+	find . -name '*.d' ! -path './dependencies/xbox/nxdk/*' -type f -delete
