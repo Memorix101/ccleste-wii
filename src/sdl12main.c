@@ -1,5 +1,14 @@
 #include <SDL.h>
 
+#ifdef __XBOX__
+#include <hal/debug.h>
+#include <hal/video.h>
+#include <windows.h>
+
+static const int SCREEN_WIDTH = 640;
+static const int SCREEN_HEIGHT = 480;
+#endif
+
 #if CELESTE_P8_ENABLE_AUDIO
 #include <SDL_mixer.h>
 #endif
@@ -56,6 +65,8 @@ static int scale = 2;
 static int scale = 3;
 #elif defined (__PSP__)
 static int scale = 2;
+#elif defined (__XBOX__)
+static int scale = 1;
 #else
 static int scale = 4;
 #endif
@@ -117,12 +128,16 @@ static char* GetDataPath(char* path, int n, const char* fname)
 {
 #ifdef _WIN32
     char pathsep = '\\';
+#elif __XBOX__
+    char pathsep = '\\';
 #else
     char pathsep = '/';
 #endif //_WIN32
 
 #if defined (__NGAGE__)
     SDL_snprintf(path, n, "E:\\System\\Apps\\Celeste\\data\\%s", fname);
+#elif defined(__XBOX__)
+    SDL_snprintf(path, n, "D:\\data\\%s", fname);
 #else
     SDL_snprintf(path, n, "data%c%s", pathsep, fname);
 #endif
@@ -160,7 +175,7 @@ static Uint32 getpixel(SDL_Surface *surface, int x, int y)
 
 static void loadbmpscale(char* filename, SDL_Surface** s)
 {
-    SDL_Surface*   surf = *s;
+    SDL_Surface *surf = *s;
     char           tmpath[4096];
     SDL_Surface*   bmp;
     int            w, h;
@@ -328,6 +343,9 @@ static FILE*      TAS                = NULL;
 
 int main(int argc, char** argv)
 {
+    #if defined(__XBOX__)
+        XVideoSetMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32, REFRESH_DEFAULT);
+    #endif
     int pico8emu(CELESTE_P8_CALLBACK_TYPE call, ...);
     int videoflag = SDL_SWSURFACE | SDL_ANYFORMAT;
     int initflag  = SDL_INIT_VIDEO;
@@ -350,6 +368,8 @@ int main(int argc, char** argv)
     SDL_CHECK(screen = SDL_SetVideoMode(400, 240, 32, videoflag));
 #elif defined (__PSP__)
     SDL_CHECK(screen = SDL_SetVideoMode(480, 272, 32, videoflag));
+#elif defined (__XBOX__)
+    SDL_CHECK(screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32, videoflag));
 #else
     SDL_CHECK(screen = SDL_SetVideoMode(PICO8_W*scale, PICO8_H*scale, 32, videoflag));
 #endif

@@ -16,3 +16,5 @@ loader/**
 *.exe
 dependencies/xbox
 dependencies/xbox/nxdk
+*.pdb
+.DS_Store

@@ -1,9 +1,8 @@
 XBE_TITLE = CCelesteX
 GEN_XISO = $(XBE_TITLE).iso
-NXDK_DIR ?= ../nxdk
-NXDK_CXX = y
+NXDK_DIR = /Volumes/SSD/Projetos_infaliveis/XboxDev/nxdk
 NXDK_SDL = y
-DEBUG = y
+NXDK_SDL_MIXER = y
 
 SRCS += \
 				$(CURDIR)/src/celeste.c \
@@ -19,19 +18,24 @@ EXTRA_OFLAGS = \
 
 FLAGS	=	\
 					-D__XBOX__ \
+					-DCELESTE_P8_ENABLE_AUDIO=1
 
-CFLAGS	+=	-g3 $(EXTRA_OFLAGS) -Wall $(INCLUDES) $(FLAGS)
+CFLAGS	+=	$(EXTRA_OFLAGS) $(INCLUDES) $(FLAGS)
 
-CXXFLAGS +=	$(CFLAGS) -Wpedantic
+CXXFLAGS +=	$(CFLAGS)
+
+new_all: copy_resources all
 
 include $(NXDK_DIR)/Makefile
 
-TARGET += $(OUTPUT_DIR)/data
-$(GEN_XISO): $(OUTPUT_DIR)/data
-$(OUTPUT_DIR)/data: $(CURDIR)/data $(OUTPUT_DIR)
-	$(VE)cp '$<' '$@'
+copy_resources:
+	@mkdir -p $(OUTPUT_DIR)
+	@mkdir -p $(OUTPUT_DIR)/data
+	@cp -r $(CURDIR)/data/* $(OUTPUT_DIR)/data/
 
 clean_local:
 	@echo clean ...
 	rm -Rf ./bin
 	find . -name '*.iso' -type f -delete
+	find . -name '*.obj' -type f -delete
+	find . -name '*.d' -type f -delete

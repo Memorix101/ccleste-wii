@@ -14,7 +14,7 @@
 
 #include "celeste.h"
 
-#if defined (__NGAGE__) || defined (NGAGE_DEBUG)
+#if defined (__NGAGE__) || defined (NGAGE_DEBUG) || defined(__XBOX__)
 #include "SDL.h"
 #define snprintf SDL_snprintf
 #endif
