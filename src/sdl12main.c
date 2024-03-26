@@ -4,9 +4,10 @@
 #include <hal/debug.h>
 #include <hal/video.h>
 #include <windows.h>
+#include <stdbool.h>
 
-static const int SCREEN_WIDTH = 640;
-static const int SCREEN_HEIGHT = 480;
+static int SCREEN_WIDTH;
+static int SCREEN_HEIGHT;
 #endif
 
 #if CELESTE_P8_ENABLE_AUDIO
@@ -128,8 +129,6 @@ static char* GetDataPath(char* path, int n, const char* fname)
 {
 #ifdef _WIN32
     char pathsep = '\\';
-#elif __XBOX__
-    char pathsep = '\\';
 #else
     char pathsep = '/';
 #endif //_WIN32
@@ -250,7 +249,7 @@ static void LoadData(void)
         char fname[20];
         char path[4096];
 
-        SDL_snprintf(fname, 20, "snd%i.wav", id);
+        SDL_snprintf(fname, 20, "snd%i.ogg", id);
         LOGLOAD(fname);
         GetDataPath(path, sizeof path, fname);
         snd[id] = Mix_LoadWAV(path);
@@ -344,7 +343,25 @@ static FILE*      TAS                = NULL;
 int main(int argc, char** argv)
 {
     #if defined(__XBOX__)
-        XVideoSetMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32, REFRESH_DEFAULT);
+        // First try 480p
+        SCREEN_WIDTH = 640;
+        SCREEN_HEIGHT = 480;
+        if (XVideoSetMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32, REFRESH_DEFAULT) == false)
+        {
+            // Try whatever else the xbox is happy with
+            VIDEO_MODE xmode;
+            void *p = NULL;
+            while (XVideoListModes(&xmode, 0, 0, &p))
+            {
+                if (xmode.width == 1080) continue;
+                if (xmode.width == 720) continue; // 720x480 doesnt work on pbkit for some reason
+                XVideoSetMode(xmode.width, xmode.height, xmode.bpp, xmode.refresh);;
+                break;
+            }
+            
+            SCREEN_WIDTH = xmode.width;
+            SCREEN_HEIGHT = xmode.height;
+        }
     #endif
     int pico8emu(CELESTE_P8_CALLBACK_TYPE call, ...);
     int videoflag = SDL_SWSURFACE | SDL_ANYFORMAT;

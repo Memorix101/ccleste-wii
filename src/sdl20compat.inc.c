@@ -139,7 +139,7 @@ static SDL_Surface *SDL_SetVideoMode(int width, int height, int bpp, Uint32 flag
         SDL_RenderCopy(sdl2_rendr, frame, NULL, NULL);
         SDL_RenderPresent(sdl2_rendr);
 
-#if defined (__PSP__) /* very hacky, draw the frame in both framebuffers */
+#if defined (__PSP__) || defined (__XBOX__) /* very hacky, draw the frame in both framebuffers */
         SDL_RenderClear(sdl2_rendr);
         SDL_RenderCopy(sdl2_rendr, frame, NULL, NULL);
         SDL_RenderPresent(sdl2_rendr);
@@ -204,12 +204,11 @@ static void SDL_Flip(SDL_Surface* screen)
     SDL_SetRenderDrawColor(sdl2_rendr, 0, 0, 0, 255);
 #if defined (__NGAGE__) || defined (NGAGE_DEBUG) || defined (__3DS__) || defined (__PSP__) || defined(__XBOX__)
     SDL_RenderCopy(sdl2_rendr, sdl2_screen_tex, &source, &dest);
-#elif defined (__XBOX__)
-    SDL_RenderCopy(sdl2_rendr, sdl2_screen_tex, NULL, &dest);
 #else
     SDL_RenderCopy(sdl2_rendr, sdl2_screen_tex, NULL, NULL);
 #endif
     SDL_RenderPresent(sdl2_rendr);
+    
 }
 
 #define SDL_GetKeyState SDL_GetKeyboardState
