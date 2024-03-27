@@ -13,13 +13,13 @@
 
 ## Original Xbox Controls
 
-D-pad or Left Analog Stick - Movement
-A Button - Jump
-B Button - Dash
-Start Button - Pause
-White Button - Save State (Works only when game paused)
-Black Button - Load State (Works only when game paused)
-Back Button - Exit Game
+- D-pad or Left Analog Stick - Movement
+- A Button - Jump
+- B Button - Dash
+- Start Button - Pause
+- White Button - Save State (Works only when game paused)
+- Black Button - Load State (Works only when game paused)
+- Back Button - Exit Game
 
 ## Recurring problems
 
