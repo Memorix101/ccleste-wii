@@ -344,30 +344,35 @@ static FILE*      TAS                = NULL;
 int main(int argc, char** argv)
 {
     #if defined(__XBOX__)
-        // Based on LithiumX solution to detect Xbox resolution: https://github.com/Ryzee119/LithiumX/blob/f4471d287d44abc84803d3b901bd4aa7ed459689/src/platform/xbox/platform.c#L99
-        // First try 720p. This is the preferred resolution
-        SCREEN_WIDTH = 1280;
-        SCREEN_HEIGHT = 720;
-        if (XVideoSetMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32, REFRESH_DEFAULT) == false) {
-            // Fall back to 640*480
-            SCREEN_WIDTH = 640;
-            SCREEN_HEIGHT = 480;
-            if (XVideoSetMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32, REFRESH_DEFAULT) == false)
+    Sleep(1000);
+    // Based on LithiumX solution to detect Xbox resolution: https://github.com/Ryzee119/LithiumX/blob/f4471d287d44abc84803d3b901bd4aa7ed459689/src/platform/xbox/platform.c#L99
+    // First try 720p. This is the preferred resolution
+    SCREEN_WIDTH = 1280;
+    SCREEN_HEIGHT = 720;
+    if (XVideoSetMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32, REFRESH_DEFAULT) == false)
+    {
+        // Fall back to 640*480
+        SCREEN_WIDTH = 640;
+        SCREEN_HEIGHT = 480;
+        if (XVideoSetMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32, REFRESH_DEFAULT) == false)
+        {
+            // Try whatever else the xbox is happy with
+            VIDEO_MODE xmode;
+            void *p = NULL;
+            while (XVideoListModes(&xmode, 0, 0, &p))
             {
-                // Try whatever else the xbox is happy with
-                VIDEO_MODE xmode;
-                void *p = NULL;
-                while (XVideoListModes(&xmode, 0, 0, &p))
-                {
-                    if (xmode.width == 1080) continue;
-                    if (xmode.width == 720) continue; // 720x480 doesnt work on pbkit for some reason
-                    XVideoSetMode(xmode.width, xmode.height, xmode.bpp, xmode.refresh);;
-                    break;
-                }
-                
-                SCREEN_WIDTH = xmode.width;
-                SCREEN_HEIGHT = xmode.height;
+                if (xmode.width == 1080)
+                    continue;
+                if (xmode.width == 720)
+                    continue; // 720x480 doesnt work on pbkit for some reason
+                XVideoSetMode(xmode.width, xmode.height, xmode.bpp, xmode.refresh);
+                ;
+                break;
             }
+
+            SCREEN_WIDTH = xmode.width;
+            SCREEN_HEIGHT = xmode.height;
+        }
         }
     #endif
     int pico8emu(CELESTE_P8_CALLBACK_TYPE call, ...);
@@ -447,14 +452,21 @@ int main(int argc, char** argv)
 
         SDL_RWops*   rw      = SDL_RWFromConstMem(loading_bmp, sizeof loading_bmp);
         SDL_Surface* loading = SDL_LoadBMP_RW(rw, 1);
+        #if defined (__XBOX__)
+        SDL_Rect     rc      = {45, 60};
+        #else
         SDL_Rect     rc      = {60, 60};
+        #endif
 
         if (!loading)
         {
+            #if defined (__XBOX__)
+            Sleep(1000);
+            #endif
             goto skip_load;
         }
 
-        SDL_BlitSurface(loading,NULL,screen,&rc);
+        SDL_BlitSurface(loading, NULL, screen, &rc);
         SDL_Flip(screen);
         SDL_FreeSurface(loading);
     }
