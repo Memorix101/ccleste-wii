@@ -31,7 +31,10 @@ include $(NXDK_DIR)/Makefile
 copy_resources:
 	@mkdir -p $(OUTPUT_DIR)
 	@mkdir -p $(OUTPUT_DIR)/data
-	@cp -r $(CURDIR)/data/* $(OUTPUT_DIR)/data/
+	@cp -r $(CURDIR)/data/xbox_sound/*.ogg $(OUTPUT_DIR)/data/
+	@cp -r $(CURDIR)/data/font.bmp $(OUTPUT_DIR)/data/
+	@cp -r $(CURDIR)/data/gfx.bmp $(OUTPUT_DIR)/data/
+	@cp -r $(CURDIR)/data/frame_xbox.bmp $(OUTPUT_DIR)/data/
 
 clean_local:
 	@echo clean ...

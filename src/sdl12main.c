@@ -5,6 +5,7 @@
 #include <hal/video.h>
 #include <windows.h>
 #include <stdbool.h>
+#include <hal/xbox.h>
 
 static int SCREEN_WIDTH;
 static int SCREEN_HEIGHT;
@@ -343,24 +344,30 @@ static FILE*      TAS                = NULL;
 int main(int argc, char** argv)
 {
     #if defined(__XBOX__)
-        // First try 480p
-        SCREEN_WIDTH = 640;
-        SCREEN_HEIGHT = 480;
-        if (XVideoSetMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32, REFRESH_DEFAULT) == false)
-        {
-            // Try whatever else the xbox is happy with
-            VIDEO_MODE xmode;
-            void *p = NULL;
-            while (XVideoListModes(&xmode, 0, 0, &p))
+        // Based on LithiumX solution to detect Xbox resolution: https://github.com/Ryzee119/LithiumX/blob/f4471d287d44abc84803d3b901bd4aa7ed459689/src/platform/xbox/platform.c#L99
+        // First try 720p. This is the preferred resolution
+        SCREEN_WIDTH = 1280;
+        SCREEN_HEIGHT = 720;
+        if (XVideoSetMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32, REFRESH_DEFAULT) == false) {
+            // Fall back to 640*480
+            SCREEN_WIDTH = 640;
+            SCREEN_HEIGHT = 480;
+            if (XVideoSetMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32, REFRESH_DEFAULT) == false)
             {
-                if (xmode.width == 1080) continue;
-                if (xmode.width == 720) continue; // 720x480 doesnt work on pbkit for some reason
-                XVideoSetMode(xmode.width, xmode.height, xmode.bpp, xmode.refresh);;
-                break;
+                // Try whatever else the xbox is happy with
+                VIDEO_MODE xmode;
+                void *p = NULL;
+                while (XVideoListModes(&xmode, 0, 0, &p))
+                {
+                    if (xmode.width == 1080) continue;
+                    if (xmode.width == 720) continue; // 720x480 doesnt work on pbkit for some reason
+                    XVideoSetMode(xmode.width, xmode.height, xmode.bpp, xmode.refresh);;
+                    break;
+                }
+                
+                SCREEN_WIDTH = xmode.width;
+                SCREEN_HEIGHT = xmode.height;
             }
-            
-            SCREEN_WIDTH = xmode.width;
-            SCREEN_HEIGHT = xmode.height;
         }
     #endif
     int pico8emu(CELESTE_P8_CALLBACK_TYPE call, ...);
@@ -643,6 +650,11 @@ static void mainLoop(void)
                 {
                 press_exit:
                     running = 0;
+                    
+#if defined (__XBOX__)
+    XReboot();
+#endif
+
                     break;
                 }
                 else if (ev.key.keysym.sym == SDLK_F11 && !(kbstate[SDLK_LSHIFT] || kbstate[SDLK_ESCAPE]))
@@ -1388,6 +1400,7 @@ static struct mapping controller_mappings[30] =
     { SDL_CONTROLLER_BUTTON_LEFTSHOULDER,  PSEUDO_BTN_SAVE_STATE }, //save
     { SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, PSEUDO_BTN_LOAD_STATE }, //load
     { SDL_CONTROLLER_BUTTON_GUIDE,         PSEUDO_BTN_EXIT }, //exit
+    { SDL_CONTROLLER_BUTTON_BACK,         PSEUDO_BTN_EXIT }, //exit
     { SDL_CONTROLLER_BUTTON_START,         PSEUDO_BTN_PAUSE }, //pause
     { 0xff, 0xff }
 };
