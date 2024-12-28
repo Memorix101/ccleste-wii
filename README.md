@@ -1,6 +1,6 @@
 # ccleste-wii
 
-[![Celeste 1](https://raw.githubusercontent.com/lemon-sherbet/ccleste/master/screenshot.png)
+![Celeste 1](https://raw.githubusercontent.com/lemon-sherbet/ccleste/master/screenshot.png)
 
 # About the project
 
