@@ -1,4 +1,4 @@
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #ifdef __XBOX__
 #include <hal/debug.h>
@@ -12,7 +12,7 @@ static int SCREEN_HEIGHT;
 #endif
 
 #if CELESTE_P8_ENABLE_AUDIO
-#include <SDL_mixer.h>
+#include <SDL2/SDL_mixer.h>
 #endif
 #if SDL_MAJOR_VERSION >= 2
 #include "sdl20compat.inc.c"
@@ -69,6 +69,8 @@ static int scale = 3;
 static int scale = 2;
 #elif defined (__XBOX__)
 static int scale = 1;
+#elif defined (__WII__)
+static int scale = 4;
 #else
 static int scale = 4;
 #endif
@@ -138,6 +140,8 @@ static char* GetDataPath(char* path, int n, const char* fname)
     SDL_snprintf(path, n, "E:\\System\\Apps\\Celeste\\data\\%s", fname);
 #elif defined(__XBOX__)
     SDL_snprintf(path, n, "D:\\data\\%s", fname);
+#elif defined(__WII__)
+    SDL_snprintf(path, n, "sd:/apps/celeste-wii/data/%s", fname);
 #else
     SDL_snprintf(path, n, "data%c%s", pathsep, fname);
 #endif
@@ -392,14 +396,22 @@ int main(int argc, char** argv)
     consoleInit(GFX_BOTTOM, NULL);
 #endif
 #if defined (__NGAGE__) || defined (NGAGE_DEBUG)
+    printf("__NGAGE__\n");
     SDL_CHECK(screen = SDL_SetVideoMode(176 * scale, 208 * scale, 32, videoflag));
 #elif defined (__3DS__)
+    printf("__3DS__\n");
     SDL_CHECK(screen = SDL_SetVideoMode(400, 240, 32, videoflag));
 #elif defined (__PSP__)
+    printf("__PSP__\n");
     SDL_CHECK(screen = SDL_SetVideoMode(480, 272, 32, videoflag));
 #elif defined (__XBOX__)
+    printf("__XBOX__\n");
     SDL_CHECK(screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32, videoflag));
+#elif defined (__WII__)
+    printf("__WII__\n");
+    SDL_CHECK(screen = SDL_SetVideoMode(PICO8_W*scale, PICO8_H*scale, 32, videoflag));
 #else
+    printf("ANY\n");
     SDL_CHECK(screen = SDL_SetVideoMode(PICO8_W*scale, PICO8_H*scale, 32, videoflag));
 #endif
     SDL_WM_SetCaption("Celeste", NULL);
@@ -454,6 +466,8 @@ int main(int argc, char** argv)
         SDL_Surface* loading = SDL_LoadBMP_RW(rw, 1);
         #if defined (__XBOX__)
         SDL_Rect     rc      = {45, 60};
+        #elif defined (__WII__)
+        SDL_Rect     rc      = {50, 60};
         #else
         SDL_Rect     rc      = {60, 60};
         #endif
@@ -462,6 +476,8 @@ int main(int argc, char** argv)
         {
             #if defined (__XBOX__)
             Sleep(1000);
+            #elif defined (__WII__)
+            //SDL_Delay(1000);
             #endif
             goto skip_load;
         }

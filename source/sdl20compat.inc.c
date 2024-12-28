@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <SDL2/SDL.h>
 
 //dummy values
 enum
@@ -15,7 +16,7 @@ static SDL_Texture*  sdl2_screen_tex = NULL;
 static SDL_Window*   sdl2_window     = NULL;
 static SDL_Renderer* sdl2_rendr      = NULL;
 
-#if defined (__NGAGE__) || defined (NGAGE_DEBUG) || defined(__3DS__) || defined(__PSP__) || defined(__XBOX__)
+#if defined (__NGAGE__) || defined (NGAGE_DEBUG) || defined(__3DS__) || defined(__PSP__) || defined(__XBOX__) || defined (__WII__)
 static SDL_Texture* frame = NULL;
 #endif
 
@@ -31,8 +32,10 @@ static SDL_Surface *SDL_SetVideoMode(int width, int height, int bpp, Uint32 flag
         sdl2_window = SDL_CreateWindow("", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, 0);
 #elif defined (__XBOX__)
         sdl2_window = SDL_CreateWindow("", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN);
+#elif defined (__WII__)
+        sdl2_window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN);
 #else
-        sdl2_window = SDL_CreateWindow("", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_RESIZABLE);
+        sdl2_window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_RESIZABLE);
 #endif
         if (!sdl2_window)
         {
@@ -68,7 +71,7 @@ static SDL_Surface *SDL_SetVideoMode(int width, int height, int bpp, Uint32 flag
         if (0)
         {
         die:
-#if defined (__NGAGE__) || defined (NGAGE_DEBUG) || defined(__3DS__) || defined(__PSP__) || defined(__XBOX__)
+#if defined (__NGAGE__) || defined (NGAGE_DEBUG) || defined(__3DS__) || defined(__PSP__) || defined(__XBOX__) || defined (__WII__)
             if (frame)
             {
                 SDL_DestroyTexture(frame);
@@ -98,7 +101,7 @@ static SDL_Surface *SDL_SetVideoMode(int width, int height, int bpp, Uint32 flag
     #endif
     assert(sdl2_screen && sdl2_screen->format->BitsPerPixel == bpp);
 
-#if defined (__NGAGE__) || defined (NGAGE_DEBUG) || defined (__PSP__) || defined (__3DS__) || defined (__XBOX__)
+#if defined (__NGAGE__) || defined (NGAGE_DEBUG) || defined (__PSP__) || defined (__3DS__) || defined (__XBOX__) || defined (__WII__)
     {
 #if defined (__NGAGE__)
         SDL_Surface* frame_sf = SDL_LoadBMP("E:\\System\\Apps\\Celeste\\data\\frame_ngage.bmp");
@@ -110,6 +113,8 @@ static SDL_Surface *SDL_SetVideoMode(int width, int height, int bpp, Uint32 flag
         SDL_Surface* frame_sf = SDL_LoadBMP("data/frame_psp.bmp");
 #elif defined (__XBOX__)
         SDL_Surface* frame_sf = SDL_LoadBMP("D:\\data\\frame_xbox.bmp");
+#elif defined (__WII__)
+        SDL_Surface* frame_sf = SDL_LoadBMP("sd:/data/frame_xbox.bmp");
 #else
         SDL_Surface* frame_sf = SDL_LoadBMP("data/frame_ngage.bmp");
 #endif
@@ -139,7 +144,7 @@ static SDL_Surface *SDL_SetVideoMode(int width, int height, int bpp, Uint32 flag
         SDL_RenderCopy(sdl2_rendr, frame, NULL, NULL);
         SDL_RenderPresent(sdl2_rendr);
 
-#if defined (__PSP__) || defined (__XBOX__) /* very hacky, draw the frame in both framebuffers */
+#if defined (__PSP__) || defined (__XBOX__) || defined (__WII__) /* very hacky, draw the frame in both framebuffers */
         SDL_RenderClear(sdl2_rendr);
         SDL_RenderCopy(sdl2_rendr, frame, NULL, NULL);
         SDL_RenderPresent(sdl2_rendr);
@@ -196,13 +201,16 @@ static void SDL_Flip(SDL_Surface* screen)
 #elif defined (__XBOX__)
     SDL_Rect source = { 0, 0, 128, 128 };
     SDL_Rect dest   = { (SCREEN_WIDTH - SCREEN_HEIGHT) / 2, 0, SCREEN_HEIGHT, SCREEN_HEIGHT };
+#elif defined (__WII__)
+    SDL_Rect source = { 0, 0, 640, 480 };
+    SDL_Rect dest   = { (640 - 480) / 2, 10, 460, 460 };
 #endif
 
     assert(screen == sdl2_screen);
     assert(sdl2_window != NULL);
     SDL_UpdateTexture(sdl2_screen_tex, NULL, screen->pixels, screen->pitch);
     SDL_SetRenderDrawColor(sdl2_rendr, 0, 0, 0, 255);
-#if defined (__NGAGE__) || defined (NGAGE_DEBUG) || defined (__3DS__) || defined (__PSP__) || defined(__XBOX__)
+#if defined (__NGAGE__) || defined (NGAGE_DEBUG) || defined (__3DS__) || defined (__PSP__) || defined(__XBOX__) || defined(__WII__)
     SDL_RenderCopy(sdl2_rendr, sdl2_screen_tex, &source, &dest);
 #else
     SDL_RenderCopy(sdl2_rendr, sdl2_screen_tex, NULL, NULL);
